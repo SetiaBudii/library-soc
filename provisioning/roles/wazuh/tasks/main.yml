@@ -1,0 +1,49 @@
+---
+# Role: wazuh
+# Menginstall Wazuh all-in-one (Indexer + Server + Dashboard) di satu VM.
+# Cocok untuk demo/latihan skala kecil (flavor standard.medium: 2 vCPU, 4GB RAM).
+#
+# CATATAN: 4GB RAM adalah minimum yang cukup ketat untuk Wazuh. Kalau nanti
+# resource host memungkinkan, naikkan flavor di topology.yml ke standard.large
+# (16GB RAM) untuk performa lebih stabil.
+
+- name: Update apt cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Install prerequisites
+  apt:
+    name:
+      - curl
+      - apt-transport-https
+      - gnupg
+    state: present
+
+- name: Download Wazuh installation assistant
+  get_url:
+    url: https://packages.wazuh.com/4.9/wazuh-install.sh
+    dest: /tmp/wazuh-install.sh
+    mode: '0755'
+    timeout: 60
+
+- name: Run Wazuh all-in-one installer
+  # -a = all-in-one (indexer + server + dashboard dalam satu node)
+  # Proses ini bisa makan waktu 10-20 menit tergantung resource & koneksi.
+  command: bash /tmp/wazuh-install.sh -a
+  args:
+    creates: /var/ossec/bin/wazuh-control   # idempotent: skip kalau sudah pernah terinstall
+  register: wazuh_install_result
+  async: 1800
+  poll: 30
+
+- name: Simpan output instalasi ke file (untuk referensi password admin dashboard)
+  copy:
+    content: "{{ wazuh_install_result.stdout | default('') }}"
+    dest: /root/wazuh-install-output.log
+    mode: '0600'
+  when: wazuh_install_result.stdout is defined
+
+- name: Tampilkan ringkasan hasil instalasi
+  debug:
+    msg: "Wazuh terinstall. Password admin dashboard tersimpan di /root/wazuh-install-output.log pada VM ini (cari baris 'The generated password for admin is')."

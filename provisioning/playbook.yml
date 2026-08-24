@@ -1,0 +1,9 @@
+---
+# Playbook utama untuk sandbox library-wazuh-single
+# Node wazuh-server: install Wazuh all-in-one (indexer + server + dashboard)
+
+- name: Configure wazuh-server
+  hosts: wazuh-server
+  become: true
+  roles:
+    - role: wazuh
