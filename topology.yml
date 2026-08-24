@@ -1,26 +1,50 @@
-name: library-wazuh-single
+name: wazuh-simple-lab
 hosts:
-  - name: wazuh-server
-    base_box:
-      image: ubuntu-noble-x86_64
-      man_user: ubuntu
-    flavor: wazuh.custom
-routers:
-  - name: wazuh-router
+  - name: target
     base_box:
       image: debian-12-x86_64
-      man_user: debian
+      mgmt_user: debian
     flavor: standard.small
+  - name: wazuh
+    base_box:
+      image: debian-12-x86_64
+      mgmt_user: debian
+    flavor: standard.large
+  - name: workstation
+    base_box:
+      image: debian-12-x86_64
+      mgmt_user: debian
+    flavor: standard.medium
+routers:
+  - name: router
+    base_box:
+      image: debian-12-x86_64
+      mgmt_user: debian
+    flavor: standard.small
+wan:
+  name: internet-connection
+  cidr: 100.100.100.0/24
 networks:
-  - name: wazuh-net
-    cidr: 10.1.60.0/24
-    accessible_by_user: True
+  - name: target-switch
+    cidr: 10.1.26.0/24
+    accessible_by_user: False
+  - name: access-switch
+    cidr: 10.1.27.0/24
 net_mappings:
-  - host: wazuh-server
-    network: wazuh-net
-    ip: 10.1.60.5
+  - host: target
+    network: target-switch
+    ip: 10.1.26.9
+  - host: wazuh
+    network: access-switch
+    ip: 10.1.27.10
+  - host: workstation
+    network: access-switch
+    ip: 10.1.27.15
 router_mappings:
-  - router: wazuh-router
-    network: wazuh-net
-    ip: 10.1.60.1
+  - router: router
+    network: target-switch
+    ip: 10.1.26.1
+  - router: router
+    network: access-switch
+    ip: 10.1.27.1
 groups: []
