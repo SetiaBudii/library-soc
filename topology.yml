@@ -3,13 +3,13 @@ hosts:
   - name: wazuh-server
     base_box:
       image: ubuntu-noble-x86_64
-      mgmt_user: ubuntu
+      man_user: ubuntu
     flavor: wazuh.custom
 routers:
   - name: wazuh-router
     base_box:
       image: debian-12-x86_64
-      mgmt_user: debian
+      man_user: debian
     flavor: standard.small
 networks:
   - name: wazuh-net
