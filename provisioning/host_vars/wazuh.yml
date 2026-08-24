@@ -1,0 +1,4 @@
+---
+# Host-specific vars untuk node "wazuh"
+# (kosong untuk sekarang - taruh override di sini kalau perlu,
+#  misal versi Wazuh khusus atau resource tuning tambahan)
