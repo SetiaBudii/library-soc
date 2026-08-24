@@ -1,0 +1,7 @@
+---
+# Variabel berlaku untuk semua host di sandbox ini
+user_access_username: user-access
+
+# global_ssh_public_user_key dan global_ssh_public_mgmt_key otomatis di-inject
+# oleh sandbox-service saat runtime (lihat dokumentasi Sandbox Provisioning) -
+# tidak perlu didefinisikan manual di sini, cukup dipakai (referensi) di role.
