@@ -1,9 +1,38 @@
 ---
-# Playbook utama untuk sandbox library-wazuh-single
-# Node wazuh-server: install Wazuh all-in-one (indexer + server + dashboard)
+# Playbook utama Sandbox Provisioning
+# Dijalankan otomatis oleh sandbox-service setelah semua VM di topology.yml selesai dibuat.
 
-- name: Configure wazuh-server
-  hosts: wazuh-server
+- name: Base setup - semua node
+  hosts: all
+  become: true
+  gather_facts: true
+  tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+      when: ansible_os_family == "Debian"
+
+    - name: Pastikan chrony (time sync) terinstall - penting untuk Wazuh (log timestamp harus akurat)
+      ansible.builtin.apt:
+        name: chrony
+        state: present
+      when: ansible_os_family == "Debian"
+
+- name: Install Wazuh manager + indexer + dashboard di node "wazuh"
+  hosts: wazuh
   become: true
   roles:
-    - role: wazuh
+    - wazuh-manager
+
+- name: Install Wazuh agent di node yang dimonitor (target, workstation)
+  hosts: target:workstation
+  become: true
+  roles:
+    - wazuh-agent
+
+- name: Setup user-access untuk host yang bisa diakses langsung oleh peserta
+  hosts: wazuh:workstation
+  become: true
+  roles:
+    - user-access
