@@ -5,7 +5,12 @@ hosts:
       image: ubuntu-noble-x86_64
       mgmt_user: ubuntu
     flavor: wazuh.custom
-routers: []
+routers:
+  - name: wazuh-router
+    base_box:
+      image: debian-12-x86_64
+      mgmt_user: debian
+    flavor: standard.small
 networks:
   - name: wazuh-net
     cidr: 10.1.60.0/24
@@ -14,5 +19,8 @@ net_mappings:
   - host: wazuh-server
     network: wazuh-net
     ip: 10.1.60.5
-router_mappings: []
+router_mappings:
+  - router: wazuh-router
+    network: wazuh-net
+    ip: 10.1.60.1
 groups: []
