@@ -1,0 +1,31 @@
+---
+# roles/wazuh-agent/tasks/main.yml
+# Install Wazuh agent dan arahkan ke manager (host "wazuh" di net_mappings topology.yml)
+
+- name: Import GPG key repo Wazuh
+  ansible.builtin.apt_key:
+    url: https://packages.wazuh.com/key/GPG-KEY-WAZUH
+    state: present
+
+- name: Tambah repo APT Wazuh
+  ansible.builtin.apt_repository:
+    repo: "deb https://packages.wazuh.com/4.x/apt/ stable main"
+    state: present
+    filename: wazuh
+
+- name: Install paket wazuh-agent
+  ansible.builtin.apt:
+    name: wazuh-agent
+    state: present
+    update_cache: true
+  environment:
+    # IP manager diambil dari inventory yang di-generate sandbox-service,
+    # sesuaikan dengan IP host "wazuh" di net_mappings (contoh: 10.1.27.10)
+    WAZUH_MANAGER: "{{ wazuh_manager_ip }}"
+
+- name: Pastikan wazuh-agent aktif dan enabled saat boot
+  ansible.builtin.systemd:
+    daemon_reload: true
+    name: wazuh-agent
+    state: started
+    enabled: true

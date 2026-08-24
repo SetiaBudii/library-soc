@@ -1,0 +1,46 @@
+---
+# roles/wazuh-manager/tasks/main.yml
+# Install Wazuh single-node (manager + indexer + dashboard) via installer resmi.
+# Node ini butuh flavor standard.large (2 vCPU / 16GB RAM) - jangan diturunkan.
+
+- name: Download Wazuh install script (all-in-one)
+  ansible.builtin.get_url:
+    url: "https://packages.wazuh.com/{{ wazuh_major_version }}/wazuh-install.sh"
+    dest: /root/wazuh-install.sh
+    mode: "0750"
+
+- name: Cek apakah Wazuh sudah pernah diinstall (idempotency)
+  ansible.builtin.stat:
+    path: /var/ossec/bin/wazuh-control
+  register: wazuh_installed
+
+- name: Jalankan Wazuh installer (mode all-in-one: -a)
+  ansible.builtin.command: /root/wazuh-install.sh -a
+  args:
+    chdir: /root
+  register: wazuh_install_result
+  when: not wazuh_installed.stat.exists
+  changed_when: not wazuh_installed.stat.exists
+
+- name: Simpan output installer (berisi password admin dashboard) ke file di controller
+  ansible.builtin.copy:
+    content: "{{ wazuh_install_result.stdout | default('Wazuh sudah terinstall sebelumnya') }}"
+    dest: "/root/wazuh-install-output.log"
+  when: not wazuh_installed.stat.exists
+
+- name: Pastikan service wazuh-manager aktif dan enabled
+  ansible.builtin.systemd:
+    name: wazuh-manager
+    state: started
+    enabled: true
+
+- name: Buka port yang dibutuhkan agent (1514/tcp,udp dan 1515/tcp) via ufw jika aktif
+  community.general.ufw:
+    rule: allow
+    port: "{{ item }}"
+    proto: tcp
+  loop:
+    - "1514"
+    - "1515"
+    - "55000"
+  ignore_errors: true

@@ -1,0 +1,26 @@
+---
+# roles/user-access/tasks/main.yml
+# Wajib diterapkan ke host yang berada di network dengan accessible_by_user: True
+# (di topology.yml kita: host "wazuh" dan "workstation" di network "access-switch")
+# Referensi: docs Sandbox Access -> "apply Ansible role user-access ke host di network accessible"
+
+- name: Buat user user-access dengan sudo
+  ansible.builtin.user:
+    name: "{{ user_access_username }}"
+    shell: /bin/bash
+    groups: sudo
+    append: true
+    state: present
+
+- name: Izinkan sudo tanpa password untuk user-access
+  ansible.builtin.copy:
+    dest: "/etc/sudoers.d/{{ user_access_username }}"
+    content: "{{ user_access_username }} ALL=(ALL) NOPASSWD:ALL\n"
+    mode: "0440"
+    validate: "visudo -cf %s"
+
+- name: Pasang SSH public key milik peserta training
+  ansible.posix.authorized_key:
+    user: "{{ user_access_username }}"
+    key: "{{ lookup('file', global_ssh_public_user_key) }}"
+    state: present
