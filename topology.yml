@@ -5,6 +5,7 @@ hosts:
       image: ubuntu-noble-x86_64
       mgmt_user: ubuntu
     flavor: wazuh.custom
+routers: []
 networks:
   - name: wazuh-net
     cidr: 10.1.60.0/24
