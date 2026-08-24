@@ -1,0 +1,9 @@
+---
+# requirements.yml (opsional)
+# Tidak ada dependency Ansible Galaxy eksternal untuk lab ini -
+# semua role (wazuh-manager, wazuh-agent, user-access) ditulis manual di roles/.
+#
+# Kalau nanti mau pakai role komunitas, contoh formatnya:
+# roles:
+#   - name: geerlingguy.repo-epel
+#     version: "3.1.0"
