@@ -1,0 +1,23 @@
+---
+# pre-playbook.yml (opsional)
+# Dijalankan SEBELUM playbook.yml. Dipakai untuk memastikan dependency dasar
+# (python, apt-transport-https, gnupg) tersedia sebelum role utama jalan.
+
+- name: Persiapan dasar sebelum provisioning utama
+  hosts: all
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Cek python3 tersedia (dibutuhkan Ansible modules)
+      ansible.builtin.raw: test -e /usr/bin/python3 || (apt update && apt install -y python3-minimal)
+      changed_when: false
+
+    - name: Install dependency dasar untuk repo Wazuh (gnupg, apt-transport-https, lsb-release)
+      ansible.builtin.apt:
+        name:
+          - gnupg
+          - apt-transport-https
+          - lsb-release
+          - curl
+        state: present
+        update_cache: true
