@@ -14,4 +14,5 @@ net_mappings:
   - host: wazuh-server
     network: wazuh-net
     ip: 10.1.60.5
+router_mappings: []
 groups: []
